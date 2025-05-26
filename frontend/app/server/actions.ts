@@ -35,6 +35,22 @@ export async function login(formData: FormData) {
 }
 
 /**
+ * Logout function to sign out the user.
+ * It uses Supabase to sign out and redirects to the login page.
+ *
+ * @returns void - Redirects to the login page after logout
+ */
+export async function logout() {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Logout error:", error);
+  }
+  revalidatePath("/", "layout");
+  redirect("/login");
+}
+
+/**
  * Signup function to register a new user.
  * It retrieves user credentials from the FormData object,
  * attempts to sign up using Supabase,
