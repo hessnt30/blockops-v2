@@ -1,24 +1,25 @@
-const http = require("http");
-const url = require("url");
-// WebSocket server and child process modules
-const { WebSocketServer, WebSocket } = require("ws");
-const { spawn } = require("child_process");
-const cors = require("cors");
+import { createServer } from "http";
+import { parse } from "url";
+import { WebSocketServer, WebSocket } from "ws";
+import { spawn } from "child_process";
+import cors from "cors";
 
-// --- Configuration Constants ---
+// --- Constants ---
 const MINECRAFT_SERVER_DIRECTORY =
-  "C:\\Users\\Nicholas\\Desktop\\Stuff\\all-my-minecraft-servers\\1.18.1-server";
-const MINECRAFT_SERVER_JAR_NAME = "minecraft_server.1.18.1.jar"; // User-provided JAR name
-const SERVER_PORT = 8080; // Port for both HTTP and WebSocket
+  "C:\\Users\\Nicholas\\Desktop\\Stuff\\all-my-minecraft-servers\\1.18.1-server"; // change this to your actual Minecraft server directory (make sure its absolute)
+const MINECRAFT_SERVER_JAR_NAME = "minecraft_server.1.18.1.jar"; // change this to your actual server JAR file name
+const SERVER_PORT = 8080; // you can leave this as is
 
 // --- WebSocket Server Setup ---
 // Initialize WebSocketServer in 'noServer' mode.
-// This means it won't automatically listen on a port; instead,
-// it will attach to an existing HTTP server.
+// This means it won't automatically listen on a port.
+// Instead, it will attach to an existing HTTP server.
+// This is so we can do a health check before attempting
+// to connect to the websocket
 const wss = new WebSocketServer({ noServer: true });
 
 // --- Minecraft Server Process Management ---
-let minecraftServerProcess = null; // Holds the spawned Minecraft server process
+let minecraftServerProcess = null;
 
 /**
  * Spawns the Minecraft server process if it's not already running.
@@ -31,6 +32,7 @@ function startMinecraftServer() {
   }
 
   console.log(`Starting Minecraft server from: ${MINECRAFT_SERVER_DIRECTORY}`);
+  // spawn the minecraft server process with typical server.jar args (1GB RAM currently)
   minecraftServerProcess = spawn(
     "java",
     [
@@ -51,7 +53,6 @@ function startMinecraftServer() {
   // Listen for data from Minecraft server's standard output
   minecraftServerProcess.stdout.on("data", (data) => {
     const output = data.toString();
-    // console.log(`Minecraft server output: ${output}`); // Uncomment for verbose server-side logging
 
     // Send the output to ALL currently connected WebSocket clients
     wss.clients.forEach((client) => {
@@ -111,18 +112,17 @@ function startMinecraftServer() {
 
 // --- HTTP Server Setup for Health Checks and WebSocket Upgrades ---
 
-// Create a standard Node.js HTTP server
-const server = http.createServer((req, res) => {
-  // Apply CORS middleware to all incoming HTTP requests
+// Create a HTTP server
+const server = createServer((req, res) => {
+  // fucking cors
   cors({
-    origin: "http://localhost:3000", // Allow requests from your React app's origin
-    methods: ["GET", "POST"], // Allow specified HTTP methods
-    // credentials: true, // Only if you're sending cookies/auth headers cross-origin
+    origin: "http://localhost:3000", // dev frontend
+    methods: ["GET", "POST"],
+    // credentials: true, // if sending cookies or auth headers
   })(req, res, () => {
-    // The third argument is a 'next' function
-    const reqUrl = url.parse(req.url, true);
+    const reqUrl = parse(req.url, true);
 
-    // Health check endpoint: /health
+    // @health endpoint for health checks
     if (reqUrl.pathname === "/health" && req.method === "GET") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
@@ -137,7 +137,7 @@ const server = http.createServer((req, res) => {
         })
       );
     } else {
-      // For any other HTTP request, return 404 Not Found
+      // For any other requests, return 404
       res.writeHead(404, { "Content-Type": "text/plain" });
       res.end("Not Found");
     }
@@ -146,8 +146,9 @@ const server = http.createServer((req, res) => {
 
 // Attach the WebSocket server to the HTTP server's 'upgrade' event.
 // This allows WebSocket connections to share the same port as the HTTP server.
+// This is necesary to have the health check endpoint work properly
 server.on("upgrade", (request, socket, head) => {
-  const pathname = url.parse(request.url).pathname;
+  const pathname = parse(request.url).pathname;
 
   // Only handle WebSocket upgrades on the '/websocket' path
   if (pathname === "/websocket") {
