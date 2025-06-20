@@ -17,9 +17,9 @@ you will need to input your server's file location into websocket.js. (Should mo
 
 ## Getting Started
 
-1. Start websocket server:
+1. Install websocket deps & start websocket server:
    ```bash
-   node websocket.js
+   npm install && node websocket.js
    ```
 2. Navigate to frontend:
    ```bash
