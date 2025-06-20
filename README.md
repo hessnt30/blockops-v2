@@ -17,13 +17,34 @@ you will need to input your server's file location into websocket.js. (Should mo
 
 ## Getting Started
 
-1. Install websocket deps & start websocket server:
+### Websocket Server
+
+1. Install websocket deps:
    ```bash
-   npm install && node websocket.js
+   npm install
    ```
-2. Navigate to frontend:
+2. Input Minecraft server info:
+   ```bash
+   # ~/.env.local
+   MINECRAFT_SERVER_DIRECTORY=[absolute path to your Minecraft server's directory]
+   MINECRAFT_SERVER_JAR=["server.jar" or whatever your's is named]
+   ```
+3. Start websocket server:
+   ```bash
+   node websocket.js
+   ```
+
+### Frontend
+
+1. Navigate to frontend:
    ```bash
    cd frontend
+   ```
+2. Supabase environment variables:
+   ```bash
+   # ~/frontend/.env.local
+   NEXT_PUBLIC_SUPABASE_URL=[i will give this to you]
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=[i will give this to you]
    ```
 3. Install dependencies:
    ```bash
@@ -40,10 +61,6 @@ you will need to input your server's file location into websocket.js. (Should mo
 Handles WebSocket connections, message dispatch, and event subscriptions for real-time features.
 
 Go to `Console` in the side navbar to see it in action
-
-## Contributing
-
-Open issues or pull requests for improvements.
 
 ## License
 

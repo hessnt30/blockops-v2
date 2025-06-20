@@ -3,11 +3,13 @@ import { parse } from "url";
 import { WebSocketServer, WebSocket } from "ws";
 import { spawn } from "child_process";
 import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.local" });
 
 // --- Constants ---
-const MINECRAFT_SERVER_DIRECTORY =
-  "C:\\Users\\Nicholas\\Desktop\\Stuff\\all-my-minecraft-servers\\1.18.1-server"; // change this to your actual Minecraft server directory (make sure its absolute)
-const MINECRAFT_SERVER_JAR_NAME = "minecraft_server.1.18.1.jar"; // change this to your actual server JAR file name
+const MINECRAFT_SERVER_DIRECTORY = process.env.MINECRAFT_SERVER_DIRECTORY; // change this to your actual Minecraft server directory (make sure its absolute)
+const MINECRAFT_SERVER_JAR_NAME = process.env.MINECRAFT_SERVER_JAR; // change this to your actual server JAR file name
 const SERVER_PORT = 8080; // you can leave this as is
 
 // --- WebSocket Server Setup ---
