@@ -10,6 +10,11 @@
 - Real-time updates via `websocket.js`
 - Modular codebase
 
+## Prerequisites
+
+You will need to have a minecraft server.jar available to test with. Once you have the server,
+you will need to input your server's file location into websocket.js. (Should move this to .env soon)
+
 ## Getting Started
 
 1. Start websocket server:
@@ -33,9 +38,6 @@
 ## websocket.js
 
 Handles WebSocket connections, message dispatch, and event subscriptions for real-time features.
-
-You will need to have a minecraft server.jar available to test with. Once you have the server,
-you will need to input your server's file location into websocket.js. (Should move this to .env soon)
 
 Go to `Console` in the side navbar to see it in action
 
